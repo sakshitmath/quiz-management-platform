@@ -5,3 +5,5 @@ spring.application.name=backend
    spring.jpa.hibernate.ddl-auto=update
    spring.jpa.show-sql=true
    server.port=8081
+   app.jwt.secret=quizplatform-secret-key-must-be-very-long-2026-change-in-production
+      app.jwt.expiration=604800000
