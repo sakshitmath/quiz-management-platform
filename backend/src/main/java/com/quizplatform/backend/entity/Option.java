@@ -1,5 +1,6 @@
 package com.quizplatform.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,5 +21,6 @@ public class Option {
     private String optionText;
 
     @Column(name = "is_correct", nullable = false)
+    @JsonProperty("isCorrect")
     private boolean isCorrect;
 }
