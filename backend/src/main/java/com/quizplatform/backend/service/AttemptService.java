@@ -16,15 +16,17 @@ public class AttemptService {
     private final QuestionRepository questionRepository;
     private final OptionRepository optionRepository;
     private final AttemptRepository attemptRepository;
+    private final AnswerRepository answerRepository;
     private final CurrentUserService currentUserService;
 
     public AttemptService(QuizRepository quizRepository, QuestionRepository questionRepository,
                           OptionRepository optionRepository, AttemptRepository attemptRepository,
-                          CurrentUserService currentUserService) {
+                          AnswerRepository answerRepository, CurrentUserService currentUserService) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.optionRepository = optionRepository;
         this.attemptRepository = attemptRepository;
+        this.answerRepository = answerRepository;
         this.currentUserService = currentUserService;
     }
 
@@ -77,6 +79,100 @@ public class AttemptService {
                 savedAttempt.getStartedAt(),
                 expiresAt,
                 questionResponses
+        );
+    }
+
+    public AttemptResultResponse submitAttempt(Long attemptId, SubmitAttemptRequest request) {
+        User user = currentUserService.getCurrentUser();
+
+        Attempt attempt = attemptRepository.findById(attemptId)
+                .orElseThrow(() -> new RuntimeException("Attempt not found"));
+
+        if (!attempt.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("This attempt does not belong to you");
+        }
+
+        if (attempt.getStatus() != Attempt.Status.IN_PROGRESS) {
+            throw new RuntimeException("This attempt has already been submitted");
+        }
+
+        Quiz quiz = attempt.getQuiz();
+        List<Question> allQuestions = questionRepository.findByQuizId(quiz.getId());
+
+        LocalDateTime expiresAt = attempt.getStartedAt().plusMinutes(quiz.getDuration());
+        boolean expired = LocalDateTime.now().isAfter(expiresAt);
+
+        int correctCount = 0;
+        int incorrectCount = 0;
+        int unansweredCount = 0;
+        int obtainedMarks = 0;
+        int totalMarks = 0;
+
+        for (Question question : allQuestions) {
+            totalMarks += question.getMarks();
+
+            AnswerSubmission submitted = request.getAnswers() == null ? null :
+                    request.getAnswers().stream()
+                            .filter(a -> a.getQuestionId().equals(question.getId()))
+                            .findFirst()
+                            .orElse(null);
+
+            Answer answer = new Answer();
+            answer.setAttempt(attempt);
+            answer.setQuestion(question);
+
+            if (submitted == null || submitted.getSelectedOptionId() == null) {
+                unansweredCount++;
+                answer.setCorrect(false);
+                answer.setSelectedOption(null);
+            } else {
+                Option selectedOption = optionRepository.findById(submitted.getSelectedOptionId())
+                        .orElseThrow(() -> new RuntimeException("Invalid option selected"));
+
+                boolean isCorrect = selectedOption.isCorrect() && selectedOption.getQuestion().getId().equals(question.getId());
+
+                answer.setSelectedOption(selectedOption);
+                answer.setCorrect(isCorrect);
+
+                if (isCorrect) {
+                    correctCount++;
+                    obtainedMarks += question.getMarks();
+                } else {
+                    incorrectCount++;
+                }
+            }
+
+            answerRepository.save(answer);
+        }
+
+        double percentage = totalMarks == 0 ? 0 : (obtainedMarks * 100.0) / totalMarks;
+        boolean passed = percentage >= quiz.getPassingScore();
+
+        int timeTakenSeconds = (int) java.time.Duration.between(attempt.getStartedAt(), LocalDateTime.now()).getSeconds();
+
+        attempt.setScore(obtainedMarks);
+        attempt.setPercentage(percentage);
+        attempt.setCorrectAnswers(correctCount);
+        attempt.setIncorrectAnswers(incorrectCount);
+        attempt.setUnanswered(unansweredCount);
+        attempt.setTimeTaken(timeTakenSeconds);
+        attempt.setCompletedAt(LocalDateTime.now());
+        attempt.setStatus(expired ? Attempt.Status.EXPIRED : Attempt.Status.COMPLETED);
+
+        attemptRepository.save(attempt);
+
+        return new AttemptResultResponse(
+                attempt.getId(),
+                quiz.getTitle(),
+                allQuestions.size(),
+                correctCount,
+                incorrectCount,
+                unansweredCount,
+                totalMarks,
+                obtainedMarks,
+                Math.round(percentage * 100.0) / 100.0,
+                passed ? "PASSED" : "FAILED",
+                timeTakenSeconds
         );
     }
 }
