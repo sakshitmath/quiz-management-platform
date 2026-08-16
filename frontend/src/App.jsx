@@ -7,6 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import QuizDetails from './pages/QuizDetails';
 import QuizAttempt from './pages/QuizAttempt';
 import QuizResult from './pages/QuizResult';
+import AttemptReview from './pages/AttemptReview';
+import AttemptHistory from './pages/AttemptHistory';
 
 function App() {
   return (
@@ -55,6 +57,24 @@ function App() {
         element={
           <ProtectedRoute allowedRole="STUDENT">
             <QuizResult />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/student/attempt/:attemptId/review"
+        element={
+          <ProtectedRoute allowedRole="STUDENT">
+            <AttemptReview />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/student/attempt-history"
+        element={
+          <ProtectedRoute allowedRole="STUDENT">
+            <AttemptHistory />
           </ProtectedRoute>
         }
       />

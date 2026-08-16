@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import QuizCard from '../components/QuizCard';
@@ -20,12 +21,17 @@ export default function StudentDashboard() {
     <div className="min-h-screen bg-slate-50 p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-slate-800">Welcome, {user?.name}</h1>
-        <button
-          onClick={logout}
-          className="text-sm text-slate-500 hover:text-slate-800 underline"
-        >
-          Log out
-        </button>
+        <div className="flex items-center gap-4">
+          <Link to="/student/attempt-history" className="text-sm text-slate-500 hover:text-slate-800 underline">
+            Attempt History
+          </Link>
+          <button
+            onClick={logout}
+            className="text-sm text-slate-500 hover:text-slate-800 underline"
+          >
+            Log out
+          </button>
+        </div>
       </div>
 
       <h2 className="text-lg font-semibold text-slate-700 mb-4">Available Quizzes</h2>
