@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/quizzes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/*/start").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/attempts/*/submit").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/**").hasRole("ADMIN")
