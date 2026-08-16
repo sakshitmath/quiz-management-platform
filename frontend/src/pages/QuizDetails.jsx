@@ -6,6 +6,7 @@ export default function QuizDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState(null);
+  const [questionCount, setQuestionCount] = useState(null);
   const [error, setError] = useState('');
   const [starting, setStarting] = useState(false);
 
@@ -13,6 +14,10 @@ export default function QuizDetails() {
     api.get(`/quizzes/${id}`)
       .then((res) => setQuiz(res.data))
       .catch(() => setError('Could not load quiz details.'));
+
+    api.get(`/quizzes/${id}/questions`)
+      .then((res) => setQuestionCount(res.data.length))
+      .catch(() => setQuestionCount(null));
   }, [id]);
 
   const handleStart = async () => {
@@ -51,6 +56,7 @@ export default function QuizDetails() {
         <p className="text-slate-500 mb-6">{quiz.description}</p>
 
         <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+          <div><span className="text-slate-400">Questions:</span> <span className="text-slate-700">{questionCount ?? '...'}</span></div>
           <div><span className="text-slate-400">Category:</span> <span className="text-slate-700">{quiz.category?.name}</span></div>
           <div><span className="text-slate-400">Difficulty:</span> <span className="text-slate-700">{quiz.difficulty}</span></div>
           <div><span className="text-slate-400">Duration:</span> <span className="text-slate-700">{quiz.duration} minutes</span></div>
