@@ -12,6 +12,8 @@ import AttemptHistory from './pages/AttemptHistory';
 import AdminCategories from './pages/AdminCategories';
 import AdminQuizzes from './pages/AdminQuizzes';
 import AdminQuestions from './pages/AdminQuestions';
+import AdminUsers from './pages/AdminUsers';
+import Leaderboard from './pages/Leaderboard';
 
 function App() {
   return (
@@ -105,6 +107,24 @@ function App() {
         element={
           <ProtectedRoute allowedRole="ADMIN">
             <AdminQuestions />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRole="ADMIN">
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/leaderboard"
+        element={
+          <ProtectedRoute>
+            <Leaderboard />
           </ProtectedRoute>
         }
       />

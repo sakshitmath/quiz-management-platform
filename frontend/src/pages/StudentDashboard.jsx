@@ -25,6 +25,9 @@ export default function StudentDashboard() {
           <Link to="/student/attempt-history" className="text-sm text-slate-500 hover:text-slate-800 underline">
             Attempt History
           </Link>
+          <Link to="/leaderboard" className="text-sm text-slate-500 hover:text-slate-800 underline">
+            Leaderboard
+          </Link>
           <button
             onClick={logout}
             className="text-sm text-slate-500 hover:text-slate-800 underline"
