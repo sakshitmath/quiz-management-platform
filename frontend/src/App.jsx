@@ -10,6 +10,7 @@ import QuizResult from './pages/QuizResult';
 import AttemptReview from './pages/AttemptReview';
 import AttemptHistory from './pages/AttemptHistory';
 import AdminCategories from './pages/AdminCategories';
+import AdminQuizzes from './pages/AdminQuizzes';
 
 function App() {
   return (
@@ -85,6 +86,15 @@ function App() {
         element={
           <ProtectedRoute allowedRole="ADMIN">
             <AdminCategories />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/quizzes"
+        element={
+          <ProtectedRoute allowedRole="ADMIN">
+            <AdminQuizzes />
           </ProtectedRoute>
         }
       />
