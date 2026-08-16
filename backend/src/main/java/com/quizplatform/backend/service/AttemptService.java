@@ -41,11 +41,11 @@ public class AttemptService {
         }
 
         List<Attempt> previousAttempts = attemptRepository.findByQuizIdAndUserId(quizId, user.getId());
-        long completedCount = previousAttempts.stream()
-                .filter(a -> a.getStatus() == Attempt.Status.COMPLETED)
+        long usedAttempts = previousAttempts.stream()
+                .filter(a -> a.getStatus() == Attempt.Status.COMPLETED || a.getStatus() == Attempt.Status.EXPIRED)
                 .count();
 
-        if (completedCount >= quiz.getMaxAttempts()) {
+        if (usedAttempts >= quiz.getMaxAttempts()) {
             throw new RuntimeException("Maximum attempts reached for this quiz");
         }
 
