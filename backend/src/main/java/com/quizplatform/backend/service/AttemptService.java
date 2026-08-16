@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.quizplatform.backend.dto.StudentStatsResponse;
+import java.util.Collections;
+import java.util.ArrayList;
 
 @Service
 public class AttemptService {
@@ -49,10 +52,11 @@ public class AttemptService {
             throw new RuntimeException("Maximum attempts reached for this quiz");
         }
 
-        List<Question> questions = questionRepository.findByQuizId(quizId);
+        List<Question> questions = new ArrayList<>(questionRepository.findByQuizId(quizId));
         if (questions.isEmpty()) {
             throw new RuntimeException("This quiz has no questions yet");
         }
+        Collections.shuffle(questions);
 
         Attempt attempt = new Attempt();
         attempt.setQuiz(quiz);
@@ -62,7 +66,8 @@ public class AttemptService {
         Attempt savedAttempt = attemptRepository.save(attempt);
 
         List<QuestionResponse> questionResponses = questions.stream().map(q -> {
-            List<Option> options = optionRepository.findByQuestionId(q.getId());
+            List<Option> options = new ArrayList<>(optionRepository.findByQuestionId(q.getId()));
+            Collections.shuffle(options);
             List<OptionResponse> optionResponses = options.stream()
                     .map(o -> new OptionResponse(o.getId(), o.getOptionText()))
                     .collect(Collectors.toList());
@@ -190,6 +195,42 @@ public class AttemptService {
                         a.getCompletedAt()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public StudentStatsResponse getMyStats() {
+        User user = currentUserService.getCurrentUser();
+        List<Attempt> completed = attemptRepository.findByUserId(user.getId()).stream()
+                .filter(a -> a.getStatus() == Attempt.Status.COMPLETED || a.getStatus() == Attempt.Status.EXPIRED)
+                .toList();
+
+        int total = completed.size();
+        int passed = (int) completed.stream()
+                .filter(a -> a.getPercentage() >= a.getQuiz().getPassingScore())
+                .count();
+        int failed = total - passed;
+
+        double avg = completed.isEmpty() ? 0.0 :
+                completed.stream().mapToDouble(Attempt::getPercentage).average().orElse(0.0);
+
+        double highest = completed.stream()
+                .mapToDouble(Attempt::getPercentage)
+                .max()
+                .orElse(0.0);
+
+        List<AttemptSummaryResponse> recent = completed.stream()
+                .sorted((a, b) -> b.getCompletedAt().compareTo(a.getCompletedAt()))
+                .limit(5)
+                .map(a -> new AttemptSummaryResponse(
+                        a.getId(), a.getQuiz().getTitle(), a.getPercentage(), a.getStatus().name(), a.getCompletedAt()
+                ))
+                .toList();
+
+        return new StudentStatsResponse(
+                total, passed, failed,
+                Math.round(avg * 100.0) / 100.0,
+                Math.round(highest * 100.0) / 100.0,
+                recent
+        );
     }
 
     public AttemptDetailResponse getAttemptDetail(Long attemptId) {

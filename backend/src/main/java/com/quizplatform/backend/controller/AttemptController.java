@@ -6,6 +6,7 @@ import com.quizplatform.backend.dto.SubmitAttemptRequest;
 import com.quizplatform.backend.service.AttemptService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.quizplatform.backend.dto.StudentStatsResponse;
 
 import java.util.List;
 
@@ -48,5 +49,9 @@ public class AttemptController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @GetMapping("/api/attempts/stats")
+    public StudentStatsResponse getMyStats() {
+        return attemptService.getMyStats();
     }
 }

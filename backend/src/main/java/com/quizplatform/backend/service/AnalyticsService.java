@@ -6,6 +6,10 @@ import com.quizplatform.backend.entity.Quiz;
 import com.quizplatform.backend.entity.User;
 import com.quizplatform.backend.repository.*;
 import org.springframework.stereotype.Service;
+import com.quizplatform.backend.dto.QuizPopularityEntry;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -64,5 +68,17 @@ public class AnalyticsService {
                 passedAttempts,
                 failedAttempts
         );
+    }
+    public List<QuizPopularityEntry> getQuizPopularity() {
+        List<Attempt> allAttempts = attemptRepository.findAll();
+
+        Map<String, Long> counts = allAttempts.stream()
+                .collect(Collectors.groupingBy(a -> a.getQuiz().getTitle(), Collectors.counting()));
+
+        return counts.entrySet().stream()
+                .map(e -> new QuizPopularityEntry(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparingLong(QuizPopularityEntry::getAttemptCount).reversed())
+                .limit(5)
+                .toList();
     }
 }
