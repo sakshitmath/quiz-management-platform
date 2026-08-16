@@ -175,4 +175,67 @@ public class AttemptService {
                 timeTakenSeconds
         );
     }
+
+    public List<AttemptSummaryResponse> getMyAttempts() {
+        User user = currentUserService.getCurrentUser();
+        List<Attempt> attempts = attemptRepository.findByUserId(user.getId());
+
+        return attempts.stream()
+                .filter(a -> a.getStatus() != Attempt.Status.IN_PROGRESS)
+                .map(a -> new AttemptSummaryResponse(
+                        a.getId(),
+                        a.getQuiz().getTitle(),
+                        a.getPercentage(),
+                        a.getStatus().name(),
+                        a.getCompletedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public AttemptDetailResponse getAttemptDetail(Long attemptId) {
+        User user = currentUserService.getCurrentUser();
+
+        Attempt attempt = attemptRepository.findById(attemptId)
+                .orElseThrow(() -> new RuntimeException("Attempt not found"));
+
+        if (!attempt.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("This attempt does not belong to you");
+        }
+
+        List<Answer> answers = answerRepository.findByAttemptId(attemptId);
+
+        List<AnswerReviewResponse> reviews = answers.stream().map(ans -> {
+            Question question = ans.getQuestion();
+            List<Option> options = optionRepository.findByQuestionId(question.getId());
+            String correctOptionText = options.stream()
+                    .filter(Option::isCorrect)
+                    .map(Option::getOptionText)
+                    .findFirst()
+                    .orElse(null);
+
+            String selectedText = ans.getSelectedOption() != null ? ans.getSelectedOption().getOptionText() : null;
+
+            return new AnswerReviewResponse(
+                    question.getId(),
+                    question.getQuestionText(),
+                    selectedText,
+                    correctOptionText,
+                    question.getExplanation(),
+                    ans.isCorrect()
+            );
+        }).collect(Collectors.toList());
+
+        return new AttemptDetailResponse(
+                attempt.getId(),
+                attempt.getQuiz().getTitle(),
+                answers.size(),
+                attempt.getCorrectAnswers(),
+                attempt.getIncorrectAnswers(),
+                attempt.getUnanswered(),
+                attempt.getPercentage(),
+                attempt.getStatus().name(),
+                attempt.getTimeTaken(),
+                reviews
+        );
+    }
 }
