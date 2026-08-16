@@ -35,6 +35,9 @@ export default function StudentDashboard() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-slate-800">Welcome, {user?.name}</h1>
         <div className="flex items-center gap-4">
+            <Link to="/student/stats" className="text-sm text-slate-500 hover:text-slate-800 underline">
+            My Performance
+          </Link>
           <Link to="/leaderboard" className="text-sm text-slate-500 hover:text-slate-800 underline">
             Leaderboard
           </Link>
