@@ -34,7 +34,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-slate-800 tracking-tight">Quiz Platform</h1>
+        <p className="text-slate-500 mt-2">Test your knowledge. Track your progress.</p>
+      </div>
+
       <div className="w-full max-w-sm bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-slate-800 mb-1">Welcome back</h1>
         <p className="text-slate-500 text-sm mb-6">Log in to continue to Quiz Platform</p>
