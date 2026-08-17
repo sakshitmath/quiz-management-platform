@@ -14,12 +14,11 @@ export default function QuizAttempt() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Calculate initial time left from server-provided expiresAt
+  // Calculate initial time left purely from duration (minutes) — avoids
+  // cross-timezone issues between browser clock and server clock in production.
   useEffect(() => {
     if (!attemptData) return;
-    const expires = new Date(attemptData.expiresAt).getTime();
-    const now = new Date().getTime();
-    setTimeLeft(Math.max(0, Math.floor((expires - now) / 1000)));
+    setTimeLeft(attemptData.duration * 60);
   }, [attemptData]);
 
   const handleSubmit = useCallback(async () => {
