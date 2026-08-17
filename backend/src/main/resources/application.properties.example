@@ -7,3 +7,4 @@ spring.application.name=backend
    server.port=8081
    app.jwt.secret=quizplatform-secret-key-must-be-very-long-2026-change-in-production
       app.jwt.expiration=604800000
+      app.admin.password=YOUR_ADMIN_PASSWORD_HERE

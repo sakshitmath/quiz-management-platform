@@ -2,11 +2,10 @@ package com.quizplatform.backend.config;
 
 import com.quizplatform.backend.entity.*;
 import com.quizplatform.backend.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
@@ -17,6 +16,9 @@ public class DataSeeder implements CommandLineRunner {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final OptionRepository optionRepository;
+
+    @Value("${app.admin.password}")
+    private String adminPassword;
 
     public DataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder,
                       CategoryRepository categoryRepository, QuizRepository quizRepository,
@@ -41,7 +43,7 @@ public class DataSeeder implements CommandLineRunner {
             User admin = new User();
             admin.setName("Admin");
             admin.setEmail(adminEmail);
-            admin.setPassword(passwordEncoder.encode("Admin@1234"));
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(User.Role.ADMIN);
             admin.setActive(true);
             userRepository.save(admin);
@@ -50,7 +52,6 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedBulkQuizContent() {
-        // Marker check — only seed once
         if (quizRepository.findAll().stream().anyMatch(q -> q.getTitle().equals("Java OOP & Basics"))) {
             return;
         }
