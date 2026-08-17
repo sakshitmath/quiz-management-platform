@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.quizplatform.backend.dto.StudentStatsResponse;
 import java.util.Collections;
 import java.util.ArrayList;
+import com.quizplatform.backend.dto.AdminAttemptView;
 
 @Service
 public class AttemptService {
@@ -278,5 +279,27 @@ public class AttemptService {
                 attempt.getTimeTaken(),
                 reviews
         );
+    }
+
+    public List<AdminAttemptView> getAllAttemptsForAdmin() {
+        List<Attempt> attempts = attemptRepository.findAll();
+
+        return attempts.stream()
+                .filter(a -> a.getStatus() != Attempt.Status.IN_PROGRESS)
+                .sorted((a, b) -> {
+                    if (a.getCompletedAt() == null) return 1;
+                    if (b.getCompletedAt() == null) return -1;
+                    return b.getCompletedAt().compareTo(a.getCompletedAt());
+                })
+                .map(a -> new AdminAttemptView(
+                        a.getId(),
+                        a.getUser().getName(),
+                        a.getUser().getEmail(),
+                        a.getQuiz().getTitle(),
+                        a.getPercentage(),
+                        a.getStatus().name(),
+                        a.getCompletedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }

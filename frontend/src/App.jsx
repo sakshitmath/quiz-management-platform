@@ -15,6 +15,7 @@ import AdminQuestions from './pages/AdminQuestions';
 import AdminUsers from './pages/AdminUsers';
 import Leaderboard from './pages/Leaderboard';
 import StudentStats from './pages/StudentStats';
+import AdminAttempts from './pages/AdminAttempts';
 
 function App() {
   return (
@@ -134,6 +135,15 @@ function App() {
         element={
           <ProtectedRoute allowedRole="STUDENT">
             <StudentStats />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/attempts"
+        element={
+          <ProtectedRoute allowedRole="ADMIN">
+            <AdminAttempts />
           </ProtectedRoute>
         }
       />
